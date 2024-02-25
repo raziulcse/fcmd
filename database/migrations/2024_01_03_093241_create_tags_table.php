@@ -22,7 +22,6 @@ return new class extends Migration
         Schema::create('taggables', function (Blueprint $table) {
             $table->foreignId('tag_id')->constrained()->cascadeOnDelete();
             $table->morphs('taggable');
-
             $table->unique(['tag_id', 'taggable_id', 'taggable_type']);
         });
     }
@@ -32,7 +31,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tags');
         Schema::dropIfExists('taggables');
+        Schema::dropIfExists('tags');
     }
 };
