@@ -3,38 +3,36 @@
 use App\Providers\RouteServiceProvider;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Layout;
+use Livewire\Volt\Component;
 
-use function Livewire\Volt\layout;
-use function Livewire\Volt\rules;
-use function Livewire\Volt\state;
+new #[Layout('layouts.guest')] class extends Component
+{
+    public string $password = '';
 
-layout('layouts.guest');
-
-state(['password' => '']);
-
-rules(['password' => ['required', 'string']]);
-
-$confirmPassword = function () {
-    $this->validate();
-
-    if (! Auth::guard('web')->validate([
-        'email' => Auth::user()->email,
-        'password' => $this->password,
-    ])) {
-        throw ValidationException::withMessages([
-            'password' => __('auth.password'),
+    /**
+     * Confirm the current user's password.
+     */
+    public function confirmPassword(): void
+    {
+        $this->validate([
+            'password' => ['required', 'string'],
         ]);
+
+        if (! Auth::guard('web')->validate([
+            'email' => Auth::user()->email,
+            'password' => $this->password,
+        ])) {
+            throw ValidationException::withMessages([
+                'password' => __('auth.password'),
+            ]);
+        }
+
+        session(['auth.password_confirmed_at' => time()]);
+
+        $this->redirectIntended(default: RouteServiceProvider::HOME, navigate: true);
     }
-
-    session(['auth.password_confirmed_at' => time()]);
-
-    $this->redirect(
-        session('url.intended', RouteServiceProvider::HOME),
-        navigate: true
-    );
-};
-
-?>
+}; ?>
 
 <div>
     <div class="mb-4 text-sm text-gray-600">
